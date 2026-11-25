@@ -11,14 +11,17 @@ Levels: **L0** no agent · **L1** agent suggests, human writes · **L2** agent w
 
 | Change type | Level | Evidence that earns this level | Who signs off |
 |---|---|---|---|
-| Tests only (`lib/*.test.ts`) | L4 | `npm test` green; the new test fails when the code under test is reverted (shown in the PR) | sampled weekly by the harness owner |
-| README / docs text (outside `docs/ai/`) | L4 | `git diff --stat` shows `*.md` only; `npm test` green | sampled weekly |
+| Tests only (`lib/*.test.ts`) | L3 | `npm test` green; the new test fails when the code under test is reverted (shown in the PR) | any team member |
+| README / docs text (`README.md`, `docs/**` outside `docs/ai/`) | L3 | `git diff --name-only origin/main...` lists only those paths (not just any `*.md`: `AGENTS.md` and `.claude/rules/*.md` are harness) | any team member |
 | Business rule in `lib/tasks.ts` | L3 | skill `change-task-rule` followed: boundary test red → green, `npm test` + `npm run typecheck` green, README row updated | any team member |
 | API route in `app/api/**` | L3 | a test per status code it can return (200/201, 400, 422); `npm test` green; `runtime = "nodejs"` kept | any team member |
-| New DB migration (`db/migrations/NNN_*.sql`) | L2 | hook accepts the name (next number); `npm run db:reset && npm test` green on a fresh DB; rollback note in the PR | @Kurkov1990 |
+| New DB migration (`db/migrations/NNN_*.sql`) | L2 | hook accepts the name (next number); `npm test` green (tests use `:memory:`, so this already applies every migration to a fresh DB); upgrade path shown in the PR: a DB created on `main` opened once with `DB_FILE=<copy>`, `schema_migrations` gains the new row and existing rows survive; rollback note | @Kurkov1990 |
 | Harness (`AGENTS.md`, `.claude/**`, `docs/ai/**`) | L2 | A/B note for behaviour changes; a hook change ships with a manual run (payload, stderr, exit code) | CODEOWNERS |
-| Editing, renaming or deleting an applied migration | L0 | blocked by `.claude/hooks/guard-migrations.mjs` (exit 2) | — |
-| Secrets (`.env*`), dependency changes | L1 | `deny` on `.env*` and `ask` on `npm install` / `package.json` in `.claude/settings.json` | human only |
+| Editing, renaming or deleting an applied (committed) migration | L0 | `.claude/hooks/guard-migrations.mjs`: PreToolUse blocks it (exit 2); PostToolUse `git diff --name-status HEAD -- db/migrations` catches what the Bash parsing misses and tells the agent to `git restore --source=HEAD` | — |
+| Secrets (`.env*` except `.env.example`), dependency changes | L1 | `deny` on the common `.env*` names plus `.claude/hooks/guard-env.mjs` for the rest; `ask` on `npm install` / `package.json` in `.claude/settings.json` | human only |
+
+No row is L4 yet: `git commit` / `git push` are `ask` and there is no CI, so an agent cannot merge on green gates.
+Tests-only and docs rows move to L4 once CI runs `npm test` on every PR and the path check above is a required status.
 
 Rule of thumb: a change type goes one level up only when its check is cheap, independent of the agent, and runs every time.
 After an incident in a change type, its level drops one step until a new check covers the incident.
