@@ -10,6 +10,12 @@ The task is a trap on purpose. The 40 h limit sits in `lib/tasks.ts` **and** in 
 
 **A — before:** commit `3d0ac87` (starter, no harness) · **B — after:** `3d0ac87` + this PR's harness files, uncommitted.
 
+> **Hook version.** The B runs used the first `guard-migrations` (as committed in `4de2115`, 2026-11-23): PreToolUse only,
+> "applied" = any file on disk, no `guard-env`. The hook in this PR was reworked after review (applied = committed at
+> `HEAD`, `cd`/redirect parsing, PostToolUse backstop, `guard-env`, fail-closed payload). The runs were **not** repeated
+> on it. The one hook event in this note still behaves the same: replaying B1's blocked call against the current hook
+> exits 2 (`replay of A/B run B1` in `docs/ai/hook-evidence.md` §2). Nothing in the A/B table depended on the parts that changed.
+
 Setup: each run in its own fresh `git clone` (`node_modules` symlinked), one fresh session per run:
 `claude -p "<prompt>" --output-format json --model sonnet --permission-mode acceptEdits --allowedTools "Bash(npm test)" "Bash(npm run typecheck)" "Bash(npm run test)"`.
 The allowlist was passed on the CLI for both sides. Otherwise A could not run tests at all, and in B headless mode

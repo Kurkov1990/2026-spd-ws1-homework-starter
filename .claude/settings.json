@@ -13,6 +13,8 @@
       "Bash(npm i *)",
       "Bash(npm uninstall *)",
       "Bash(npm run db:reset)",
+      "Bash(npm run db:reset *)",
+      "Bash(node scripts/db-reset.mjs*)",
       "Bash(git push *)",
       "Bash(git commit *)",
       "Bash(rm -r *)",
@@ -67,7 +69,7 @@
         ]
       },
       {
-        "matcher": "Read|Edit|Write|MultiEdit|NotebookEdit",
+        "matcher": "Read|Edit|Write|MultiEdit|NotebookEdit|Grep|Bash",
         "hooks": [
           {
             "type": "command",

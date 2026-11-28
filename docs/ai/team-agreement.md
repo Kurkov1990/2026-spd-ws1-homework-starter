@@ -18,7 +18,7 @@ Levels: **L0** no agent · **L1** agent suggests, human writes · **L2** agent w
 | New DB migration (`db/migrations/NNN_*.sql`) | L2 | hook accepts the name (next number); `npm test` green (tests use `:memory:`, so this already applies every migration to a fresh DB); upgrade path shown in the PR: a DB created on `main` opened once with `DB_FILE=<copy>`, `schema_migrations` gains the new row and existing rows survive; rollback note | @Kurkov1990 |
 | Harness (`AGENTS.md`, `.claude/**`, `docs/ai/**`) | L2 | A/B note for behaviour changes; a hook change ships with a manual run (payload, stderr, exit code) | CODEOWNERS |
 | Editing, renaming or deleting an applied (committed) migration | L0 | `.claude/hooks/guard-migrations.mjs`: PreToolUse blocks it (exit 2); PostToolUse `git diff --name-status HEAD -- db/migrations` catches what the Bash parsing misses and tells the agent to `git restore --source=HEAD` | — |
-| Secrets (`.env*` except `.env.example`), dependency changes | L1 | `deny` on the common `.env*` names plus `.claude/hooks/guard-env.mjs` for the rest; `ask` on `npm install` / `package.json` in `.claude/settings.json` | human only |
+| Secrets (`.env*` except `.env.example`), dependency changes | L1 | `deny` on the common `.env*` names plus `.claude/hooks/guard-env.mjs` (file tools, Grep, Bash; limits in `docs/ai/hook-evidence.md` §4); `ask` on `npm install` / `package.json` in `.claude/settings.json` | human only |
 
 No row is L4 yet: `git commit` / `git push` are `ask` and there is no CI, so an agent cannot merge on green gates.
 Tests-only and docs rows move to L4 once CI runs `npm test` on every PR and the path check above is a required status.

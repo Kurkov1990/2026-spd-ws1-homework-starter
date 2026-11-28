@@ -46,13 +46,15 @@ function realpathOr(p) {
   }
 }
 
-let payload;
+// Payload: a BOM is stripped. Malformed JSON fails closed in pre mode (we can't tell what the call would do);
+// post mode runs anyway, because its check reads git, not the payload.
+let payload = {};
 try {
-  payload = JSON.parse(readFileSync(0, "utf8"));
+  payload = JSON.parse(readFileSync(0, "utf8").replace(/^\uFEFF/, ""));
 } catch {
-  process.exit(0); // a malformed payload is not a migration change; don't break the session
+  if (mode === "pre") block("could not parse the hook payload, so the call is blocked to be safe (fail closed).", "unparsable payload");
 }
-const tool = payload.tool_name ?? "";
+const tool = payload.tool_name ?? "unknown tool";
 const input = payload.tool_input ?? {};
 
 const onDisk = existsSync(migrationsDir) ? readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")) : [];

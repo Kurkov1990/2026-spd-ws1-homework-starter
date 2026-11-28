@@ -31,10 +31,57 @@ run "Bash: 2>&1 and a read (allowed)" "{\"tool_name\":\"Bash\",\"tool_input\":{\
 run "Bash: repair from HEAD (allowed)" "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git restore --source=HEAD --staged --worktree -- $M/001_create_tasks.sql\"}}"
 run "Bash: restore from an older commit" "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git restore --source=HEAD~1 -- $M/001_create_tasks.sql\"}}"
 
-# A throwaway clone for cases that need real file changes: an uncommitted 003 and the PostToolUse backstop.
+# Payload edge cases. Decision: strip a BOM; malformed JSON fails closed (exit 2) in pre mode.
+run "Edit an applied migration, payload starts with a BOM" $'\xEF\xBB\xBF'"{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$M/001_create_tasks.sql\"}}"
+run "Malformed JSON payload (fail closed)" '{"tool_name":"Edit",'
+
+# Bash commands as the agent would type them; payload JSON is built by node, so no hand escaping.
+bashrun() {
+  echo "\$ [Bash: $1]"
+  echo "  command: $2"
+  node -e 'process.stdout.write(JSON.stringify({tool_name:"Bash",tool_input:{command:process.argv[1]}}))' "$2" |
+    node .claude/hooks/guard-migrations.mjs $3
+  echo "exit code: $?"
+  echo
+}
+bashrun "replay of A/B run B1: shell heredoc creating 003 (blocked; use Write)" $'cat > db/migrations/003_raise_estimate_limit.sql <<EOF\ncreate table x (id int);\nEOF'
+
+# Known limits: the pre check exits 0 on these; the post check below catches the result.
+LIMIT_XARGS="ls $M/001* | xargs perl -pi -e s/120/200/"
+LIMIT_FIND="find $M -name '001*' -exec perl -pi -e s/120/200/ {} +"
+LIMIT_NODE="node -e \"require('fs').appendFileSync('$M/001_create_tasks.sql', '-- x')\""
+LIMIT_PY="python3 -c \"open('$M/002_add_task_estimate.sql', 'a').write('-- x')\""
+bashrun "known limit: ls | xargs (pre exits 0)" "$LIMIT_XARGS"
+bashrun "known limit: find -exec (pre exits 0)" "$LIMIT_FIND"
+bashrun "known limit: node -e (pre exits 0)" "$LIMIT_NODE"
+bashrun "known limit: python -c (pre exits 0)" "$LIMIT_PY"
+
+# guard-env: file tools, Grep and Bash.
+envrun() {
+  echo "\$ [guard-env: $1]"
+  printf '%s' "$2" | node .claude/hooks/guard-env.mjs
+  echo "exit code: $?"
+  echo
+}
+envcmd() {
+  envrun "Bash: $1 $2" "$(node -e 'process.stdout.write(JSON.stringify({tool_name:"Bash",tool_input:{command:process.argv[1]}}))' "$1")"
+}
+E=.env
+envrun "Read .env.example (allowed)" '{"tool_name":"Read","tool_input":{"file_path":".env.example"}}'
+envrun "Read $E.staging" "{\"tool_name\":\"Read\",\"tool_input\":{\"file_path\":\"$E.staging\"}}"
+envrun "Grep with path $E" "{\"tool_name\":\"Grep\",\"tool_input\":{\"pattern\":\"SECRET\",\"path\":\"$E\"}}"
+envrun "Grep with glob $E*" "{\"tool_name\":\"Grep\",\"tool_input\":{\"pattern\":\"SECRET\",\"glob\":\"$E*\"}}"
+envrun "Grep over the project (allowed: the Grep tool skips gitignored $E files)" '{"tool_name":"Grep","tool_input":{"pattern":"SECRET","path":"."}}'
+envcmd "cat $E"
+envcmd "source ./$E.local && npm test"
+envcmd "cat .env.example" "(allowed)"
+envcmd "rg SECRET ." "(allowed: rg skips gitignored files)"
+
+# A throwaway clone for cases that need real file changes: an uncommitted 003, the PostToolUse backstop,
+# and recursive grep while a secret file exists.
 SRC="$PWD"
 TMP="$(mktemp -d)"
-git clone -q "$SRC" "$TMP/repo" && cp "$SRC/.claude/hooks/guard-migrations.mjs" "$TMP/repo/.claude/hooks/"
+git clone -q "$SRC" "$TMP/repo" && cp "$SRC"/.claude/hooks/*.mjs "$TMP/repo/.claude/hooks/"
 (
   cd "$TMP/repo" || exit 1
   export CLAUDE_PROJECT_DIR="$PWD"
@@ -44,13 +91,28 @@ git clone -q "$SRC" "$TMP/repo" && cp "$SRC/.claude/hooks/guard-migrations.mjs" 
     echo "exit code: $?"
     echo
   }
+  post() { run "post check after: $1" '{"tool_name":"Bash","tool_input":{"command":"(see label)"}}' post; }
+  restore() { git restore --source=HEAD --staged --worktree -- "$M"; }
+
   echo "-- 003 written but not committed --" && echo "select 1;" > "$M/003_add_task_description.sql"
   run "Edit the uncommitted 003 (allowed)" "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$M/003_add_task_description.sql\",\"old_string\":\"1\",\"new_string\":\"2\"}}"
   run "Write the next one, 004 (allowed)" "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$M/004_add_owner.sql\",\"content\":\"x\"}}"
-  run "Post check with only a new 003 (allowed)" '{"tool_name":"Bash","tool_input":{"command":"x"}}' post
-  echo "-- something the parser missed rewrote 002 --" && printf -- '-- x\n' >> "$M/002_add_task_estimate.sql"
-  run "Post check after 002 changed" '{"tool_name":"Bash","tool_input":{"command":"find db -name 002* -exec sh -c ..."}}' post
+  post "only a new 003 exists (allowed)"
+
+  echo "-- the known-limit commands, run for real --"
+  for c in "$LIMIT_XARGS" "$LIMIT_FIND" "$LIMIT_NODE" "$LIMIT_PY"; do
+    echo "ran: $c" && sh -c "$c" && post "$c"
+    restore
+  done
   rm "$M/001_create_tasks.sql"
-  run "Post check after 001 deleted too" '{"tool_name":"Bash","tool_input":{"command":"x"}}' post
+  post "rm of 001"
+  run "post check with a malformed payload still runs (git, not the payload)" '{"tool_name":' post
+  restore
+  post "restore --source=HEAD (clean again)"
+
+  echo "-- a secret $E exists (clone only, fake value) --" && printf 'SECRET=fake\n' > "$E"
+  envcmd "grep -rn SECRET ."
+  envcmd "grep -rn SECRET . --exclude=$E*" "(allowed)"
+  envcmd "rg -uu SECRET ."
 )
 rm -rf "$TMP"
