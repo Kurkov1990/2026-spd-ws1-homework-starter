@@ -29,7 +29,7 @@ The app is at http://localhost:3000, the API at `/api/tasks` (`GET`, `POST`) and
 
 | Where | What |
 |---|---|
-| `lib/tasks.ts` | business rules: title 1..120, estimate 1..40 h, `todo → doing → done`, done is final |
+| `lib/tasks.ts` | business rules: title 1..120, estimate whole 1..40 h, `todo → doing → done`, done is final |
 | `lib/db.ts` | SQLite via `node:sqlite`, applies `db/migrations/*.sql` in order |
 | `db/migrations/` | applied migrations — a good candidate for a protecting hook |
 | `app/api/` | route handlers |

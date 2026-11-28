@@ -10,7 +10,7 @@ Tiny Next.js 16 app: tasks API + SQLite (`node:sqlite`) + vitest. Node >= 22.13.
 - `npm run db:reset` — deletes the local DB; ask first
 
 ## Where things live
-- `lib/tasks.ts` — business rules (title 1..120, estimate 1..40 h, `todo → doing → done`, done is final)
+- `lib/tasks.ts` — business rules (title 1..120, estimate whole 1..40 h, `todo → doing → done`, done is final)
 - `lib/db.ts` — opens SQLite, applies `db/migrations/*.sql` in name order
 - `app/api/tasks/**/route.ts` — thin route handlers
 - `docs/ai/` — team agreement, handoff template, A/B note
