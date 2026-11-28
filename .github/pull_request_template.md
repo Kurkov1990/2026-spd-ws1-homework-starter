@@ -1,30 +1,37 @@
-## Participant
+<!-- owner: @Kurkov1990 · why: anyone must walk back from a merge commit to the requirement, spec, tests, evidence and reviewer · review-by: 2027-03-23
+     Title: "<KEY> <imperative summary>", e.g. "TASK-7 Whole-hour estimates". Branch: <KEY>-<slug>. Every commit: "Refs: <KEY>" (AGENTS.md → Commits).
+     Use full links (https://github.com/Kurkov1990/2026-spd-ws1-homework-starter/blob/<branch>/<path>): a bare path does not open from a PR page.
+     The trace gate (.github/workflows/trace-gate.yml) fails the PR without a key in the title, Refs on every commit, or evidence for the head. -->
+## Requirement
 
-- **First and last name (required):**
-- GitHub handle:
+- Ticket: <!-- full link, e.g. https://github.com/Kurkov1990/2026-spd-ws1-homework-starter/blob/main/docs/tickets/TASK-7.md -->
+- Spec: <!-- full link to the committed spec (blob/<branch>/docs/specs/<KEY>.md): acceptance criteria, non-goals -->
+- Spec approved by: <!-- @handle, and when -->
 
-## What I built
+## Scope
 
-<!-- 3–5 sentences: the harness, and why these rules for this repo -->
+<!-- What changes, in 1–3 lines. One purpose per PR. What is deliberately not in this PR. -->
 
-## Checklist
+## Verified, and how
 
-- [ ] `docs/ai/team-agreement.md` — autonomy matrix with ≥ 4 change types, owners, how rules change
-- [ ] short root `AGENTS.md`, no `CLAUDE.md`
-- [ ] path rule in `.claude/rules/` with `paths:`
-- [ ] skill in `.claude/skills/`
-- [ ] handoff template
-- [ ] blocking hook + evidence (log or manual run output with exit code)
-- [ ] permissions in `.claude/settings.json` (deny + ask)
-- [ ] `.github/CODEOWNERS`
-- [ ] A/B note, ≥ 2 runs per side
+- Revision: <!-- the full SHA the checks ran on -->
+- Commands: <!-- e.g. npm test, npm run typecheck, node docs/ai/ci/trace-gate.mjs … — with exit codes -->
+- Evidence: <!-- full link to docs/evidence/<KEY>/<slice>.md: commands, outputs, exit codes -->
+- Tests that prove the acceptance criteria: <!-- file and test names -->
 
-## Hook evidence
+## Known gaps
 
-<!-- paste the log lines or the manual run: command, stderr, exit code -->
+<!-- What was not verified, and why. "None" only if you mean it. -->
 
-## Environment
+## Rollback
 
-- Claude Code version (`claude --version`):
-- OS:
-- Anything that didn't work as documented:
+<!-- How to undo: revert the merge commit (git revert -m 1 <merge-sha>)? data or config to restore? -->
+
+## Agent involvement
+
+<!-- None, or: tool and model, what it did (spec draft, code, tests, review). Matches the Assisted-by trailers. -->
+
+## Accountable
+
+- Author: <!-- @handle — answers for this change after merge -->
+- Reviewer: <!-- @handle of the human who judged it; agent review findings linked or pasted below -->

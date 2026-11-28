@@ -31,3 +31,30 @@ describe("tasks", () => {
     expect(() => moveTask(db, t.id, "done")).toThrow(RuleViolation);
   });
 });
+
+// TASK-7: docs/specs/TASK-7.md
+describe("estimateHours", () => {
+  const MESSAGE = "estimateHours must be a whole number 1..40";
+
+  it("accepts 1 (lower boundary)", () => {
+    expect(createTask(db, { title: "Min", estimateHours: 1 }).estimateHours).toBe(1);
+  });
+
+  it("accepts 40 (upper boundary)", () => {
+    expect(createTask(db, { title: "Max", estimateHours: 40 }).estimateHours).toBe(40);
+  });
+
+  it.each([0, 41, 1.5, "3", "abc"])("rejects %j with the message and stores nothing", (value) => {
+    expect(() => createTask(db, { title: "Bad estimate", estimateHours: value })).toThrow(new RuleViolation(MESSAGE));
+    expect(listTasks(db)).toHaveLength(0);
+  });
+
+  it.each([null, true, "40"])("rejects %j with the message and stores nothing (D1–D3)", (value) => {
+    expect(() => createTask(db, { title: "Bad estimate", estimateHours: value })).toThrow(new RuleViolation(MESSAGE));
+    expect(listTasks(db)).toHaveLength(0);
+  });
+
+  it("creates a task without estimateHours with estimateHours: null", () => {
+    expect(createTask(db, { title: "No estimate" }).estimateHours).toBeNull();
+  });
+});

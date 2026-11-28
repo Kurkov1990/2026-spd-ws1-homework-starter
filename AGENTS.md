@@ -10,7 +10,7 @@ Tiny Next.js 16 app: tasks API + SQLite (`node:sqlite`) + vitest. Node >= 22.13.
 - `npm run db:reset` — deletes the local DB; ask first
 
 ## Where things live
-- `lib/tasks.ts` — business rules (title 1..120, estimate 1..40 h, `todo → doing → done`, done is final)
+- `lib/tasks.ts` — business rules (title 1..120, estimate whole 1..40 h, `todo → doing → done`, done is final)
 - `lib/db.ts` — opens SQLite, applies `db/migrations/*.sql` in name order
 - `app/api/tasks/**/route.ts` — thin route handlers
 - `docs/ai/` — team agreement, handoff template, A/B note
@@ -22,6 +22,11 @@ Tiny Next.js 16 app: tasks API + SQLite (`node:sqlite`) + vitest. Node >= 22.13.
 3. Every rule change gets a test in `lib/*.test.ts` that fails without it.
 4. Do not read or write `.env*` (except `.env.example`). No new dependencies without asking.
 5. No `CLAUDE.md` / `CLAUDE.local.md` in the repo; this file is the only root instruction file.
+
+## Commits
+Every commit ends with trailers: `Refs: <KEY>` always, `Assisted-by: <tool> (<model>)` when an agent helped,
+`Evidence: docs/evidence/<KEY>/<slice>.md` on the evidence commit. Branch `<KEY>-<slug>`, PR title starts with
+`<KEY>`, merge with a merge commit. Full rule and examples: `.claude/rules/commits.md`; CI checks it (trace gate).
 
 ## Procedures
 - Changing a task rule or adding a task field: skill `change-task-rule`.
