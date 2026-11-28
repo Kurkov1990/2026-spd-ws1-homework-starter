@@ -1,8 +1,9 @@
-<!-- HW 1.2: copy to .github/pull_request_template.md in your fork. Title: "<KEY> <imperative summary>", e.g. "TASK-7 Whole-hour estimates". -->
+<!-- HW 1.2: copy to .github/pull_request_template.md in your fork. Title: "<KEY> <imperative summary>", e.g. "TASK-7 Whole-hour estimates".
+     Use full links (https://github.com/<you>/<repo>/blob/<branch>/<path>): a bare path such as docs/tickets/TASK-7.md does not open from a PR page. -->
 ## Requirement
 
-- Ticket: <!-- link, e.g. docs/tickets/TASK-7.md -->
-- Spec: <!-- link to the committed spec: acceptance criteria, non-goals -->
+- Ticket: <!-- full link, e.g. https://github.com/<you>/2026-spd-ws1-homework-starter/blob/main/docs/tickets/TASK-7.md -->
+- Spec: <!-- full link to the committed spec (blob/<branch>/docs/specs/<KEY>.md): acceptance criteria, non-goals -->
 
 ## Scope
 
@@ -11,7 +12,7 @@
 ## Verified, and how
 
 - Revision: <!-- the SHA the checks ran on -->
-- Evidence: <!-- docs/evidence/<KEY>/<slice>.md: commands, outputs, exit codes -->
+- Evidence: <!-- full link to docs/evidence/<KEY>/<slice>.md: commands, outputs, exit codes -->
 - Tests that prove the acceptance criteria: <!-- file and test names -->
 
 ## Known gaps
