@@ -23,6 +23,11 @@ Tiny Next.js 16 app: tasks API + SQLite (`node:sqlite`) + vitest. Node >= 22.13.
 4. Do not read or write `.env*` (except `.env.example`). No new dependencies without asking.
 5. No `CLAUDE.md` / `CLAUDE.local.md` in the repo; this file is the only root instruction file.
 
+## Commits
+Every commit ends with trailers: `Refs: <KEY>` always, `Assisted-by: <tool> (<model>)` when an agent helped,
+`Evidence: docs/evidence/<KEY>/<slice>.md` on the evidence commit. Branch `<KEY>-<slug>`, PR title starts with
+`<KEY>`, merge with a merge commit. Full rule and examples: `.claude/rules/commits.md`; CI checks it (trace gate).
+
 ## Procedures
 - Changing a task rule or adding a task field: skill `change-task-rule`.
 - Ending a session with unfinished work: fill `docs/ai/handoff-template.md`.
