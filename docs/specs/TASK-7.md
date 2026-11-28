@@ -58,7 +58,7 @@ Added by this spec:
 | accepts 1 (lower boundary) | AC1 | passes — regression guard |
 | accepts 40 (upper boundary) | AC1 | passes — regression guard |
 | `it.each` rejects `0`, `41`, `1.5`, `"3"`, `"abc"` with the exact message and stores nothing | AC1, AC4, AC5 | **fails**: `0`/`41` give the old message, `1.5`/`"3"`/`"abc"` don't throw |
-| `it.each` rejects `null`, `true`, `"40"` with the exact message | AC6 | **fails**: old message or no throw |
+| `it.each` rejects `null`, `true`, `"40"` with the exact message and stores nothing | AC5, AC6 | **fails**: old message or no throw |
 | creates a task without estimateHours with `estimateHours: null` | AC3 | passes — regression guard |
 
 `app/api/tasks/route.test.ts`:

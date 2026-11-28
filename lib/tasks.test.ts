@@ -49,8 +49,9 @@ describe("estimateHours", () => {
     expect(listTasks(db)).toHaveLength(0);
   });
 
-  it.each([null, true, "40"])("rejects %j with the message (D1–D3)", (value) => {
+  it.each([null, true, "40"])("rejects %j with the message and stores nothing (D1–D3)", (value) => {
     expect(() => createTask(db, { title: "Bad estimate", estimateHours: value })).toThrow(new RuleViolation(MESSAGE));
+    expect(listTasks(db)).toHaveLength(0);
   });
 
   it("creates a task without estimateHours with estimateHours: null", () => {
