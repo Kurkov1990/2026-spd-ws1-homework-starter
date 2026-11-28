@@ -7,7 +7,7 @@ is the agent harness around it.
 **Start here: [HOMEWORK.md](HOMEWORK.md)** — task, deliverables, how to submit, rubric.
 
 **Homework 1.2 (traceability): [HOMEWORK-1.2.md](HOMEWORK-1.2.md)** — ticket [TASK-7](docs/tickets/TASK-7.md),
-CI files in [docs/ai/ci/](docs/ai/ci/README.md), deadline Mon 30.11.2026 23:59 (Kyiv).
+CI files in [docs/ai/ci/](docs/ai/ci/README.md), deadline Wed 02.12.2026 23:59 (Kyiv).
 
 ## Run it
 

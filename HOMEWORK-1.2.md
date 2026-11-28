@@ -1,6 +1,6 @@
 # Homework 1.2 — Traceability, from ticket to merge
 
-**Effort:** 90–120 min · **Deadline:** Mon 30.11.2026, 23:59 (Kyiv) · **Works on any Claude plan**
+**Effort:** 90–120 min · **Deadline:** Wed 02.12.2026, 23:59 (Kyiv) · **Works on any Claude plan**
 
 Deliver one small ticket so that anyone can walk back from the merged commit to the requirement, the spec, the tests
 and the person who judged the change. Then make CI enforce that trail. Work in **the same fork** (or own repo) as
